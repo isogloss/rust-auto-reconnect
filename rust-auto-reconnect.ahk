@@ -43,10 +43,6 @@ global ServerListView
 global RotationMinutes
 global AFKSeconds
 global SkipLaunchCheckbox
-global StartScriptButton
-global StopScriptButton
-global HotkeysText
-global BottomDivider
 global CompactMode := false
 global FullWindowHeight := 975
 global CompactWindowHeight := 345
@@ -111,6 +107,7 @@ CreateGUI()
 return
 
 CreateGUI() {
+    global StartScriptButton, StopScriptButton, HotkeysText, BottomDivider
     Gui, Main:New, -Caption -DPIScale, Rust Auto Reconnect Manager
     Gui, Main:Color, 000000
     Gui, Main:Font, s12 Bold cYellow, Arial
