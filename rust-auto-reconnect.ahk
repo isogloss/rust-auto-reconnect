@@ -43,6 +43,13 @@ global ServerListView
 global RotationMinutes
 global AFKSeconds
 global SkipLaunchCheckbox
+global StartScriptButton
+global StopScriptButton
+global HotkeysText
+global BottomDivider
+global CompactMode := false
+global FullWindowHeight := 975
+global CompactWindowHeight := 345
 
 SaveServersToRegistry() {
     Loop, 100
@@ -174,15 +181,38 @@ CreateGUI() {
     Gui, Main:Add, Edit, x30 y695 w540 h150 vConsoleOutput ReadOnly Background000000 c00FF00 -Wrap HScroll
     Gui, Main:Add, Progress, x20 y860 w560 h1 c00FF00
     Gui, Main:Font, s12 Bold c00FF00, Arial
-    Gui, Main:Add, Text, x30 y875 w260 h50 gStartScript Center, [ START SCRIPT ]
-    Gui, Main:Add, Text, x310 y875 w260 h50 gStopScript Center, [ STOP SCRIPT ]
+    Gui, Main:Add, Text, x30 y875 w260 h50 vStartScriptButton gStartScript Center, [ START SCRIPT ]
+    Gui, Main:Add, Text, x310 y875 w260 h50 vStopScriptButton gStopScript Center, [ STOP SCRIPT ]
     Gui, Main:Font, s8 Normal c00FF00, Arial
-    Gui, Main:Add, Text, x20 y940 w560 Center, Hotkeys: F9 = Manual Rotation | F10 = Pause/Resume | F12 = Reload Script
-    Gui, Main:Add, Progress, x20 y960 w560 h1 c00FF00
+    Gui, Main:Add, Text, x20 y940 w560 vHotkeysText Center, Hotkeys: F9 = Manual Rotation | F10 = Pause/Resume | F12 = Reload Script
+    Gui, Main:Add, Progress, x20 y960 w560 h1 vBottomDivider c00FF00
     Gui, Main:Show, w600 h975
     LogConsole("System initialized successfully", "SUCCESS")
     LogConsole("Loaded " . ServerList.Length() . " servers from registry", "INFO")
     LogConsole("Ready to start - Click START SCRIPT button", "INFO")
+}
+
+SetCompactLayout(enableCompact := false) {
+    global CompactMode, CompactWindowHeight, FullWindowHeight
+    if (enableCompact) {
+        if (CompactMode)
+            return
+        GuiControl, Main:Move, StartScriptButton, x30 y250 w260 h50
+        GuiControl, Main:Move, StopScriptButton, x310 y250 w260 h50
+        GuiControl, Main:Move, HotkeysText, x20 y315 w560 h20
+        GuiControl, Main:Move, BottomDivider, x20 y335 w560 h1
+        Gui, Main:Show, h%CompactWindowHeight%
+        CompactMode := true
+    } else {
+        if (!CompactMode)
+            return
+        GuiControl, Main:Move, StartScriptButton, x30 y875 w260 h50
+        GuiControl, Main:Move, StopScriptButton, x310 y875 w260 h50
+        GuiControl, Main:Move, HotkeysText, x20 y940 w560 h20
+        GuiControl, Main:Move, BottomDivider, x20 y960 w560 h1
+        Gui, Main:Show, h%FullWindowHeight%
+        CompactMode := false
+    }
 }
 
 MinimizeWindow:
@@ -284,6 +314,7 @@ ScriptRunning := true
 Gui, Main:Font, s9 Bold c00FF00, Arial
 GuiControl, Main:Font, StatusText
 GuiControl, Main:, StatusText, ONLINE
+SetCompactLayout(true)
 LogConsole("Script status changed to ONLINE", "SUCCESS")
 if (SkipRustLaunch) {
     LogConsole("Skipping Rust launch (Rust already running option enabled)", "INFO")
@@ -344,6 +375,7 @@ SetTimer, UpdateStatusTimers, Off
 LogConsole("All monitoring systems disabled", "SUCCESS")
 LogConsole("Script status changed to OFFLINE", "SUCCESS")
 LogConsole("Rust will continue running", "INFO")
+SetCompactLayout(false)
 UpdateServerListView()
 MsgBox, 64, Stopped, Script has been stopped. Rust will continue running.
 return
